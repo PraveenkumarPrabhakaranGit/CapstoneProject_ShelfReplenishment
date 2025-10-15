@@ -191,13 +191,31 @@ const Login = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-14 text-base font-semibold border-2 border-gray-300 bg-white/90 backdrop-blur-sm hover:bg-gray-50/90 rounded-xl transition-all duration-200 transform hover:scale-[1.02]" 
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 text-base font-semibold border-2 border-gray-300 bg-white/90 backdrop-blur-sm hover:bg-gray-50/90 rounded-xl transition-all duration-200 transform hover:scale-[1.02]"
                     onClick={handleBack}
                     disabled={isLoading}
                   >
                     Change Role
+                  </Button>
+
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full bg-gray-200" />
+                    </div>
+                    <div className="relative flex justify-center text-sm uppercase">
+                      <span className="bg-white px-4 text-gray-500 font-semibold tracking-wide">New User?</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    className="w-full h-14 text-base font-semibold border-2 border-blue-300 bg-blue-50/90 backdrop-blur-sm hover:bg-blue-100/90 text-blue-700 hover:text-blue-800 rounded-xl transition-all duration-200 transform hover:scale-[1.02]"
+                    onClick={() => navigate('/register')}
+                    disabled={isLoading}
+                  >
+                    Create an Account
                   </Button>
                 </>
               )}
