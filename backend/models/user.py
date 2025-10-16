@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional, Literal
 from datetime import datetime
 
@@ -13,19 +13,22 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
         if len(v) < 6:
             raise ValueError('Password must be at least 6 characters long')
         return v
     
-    @validator('role')
+    @field_validator('role')
+    @classmethod
     def validate_role(cls, v):
         if v not in ['associate', 'manager']:
             raise ValueError('Role must be either "associate" or "manager"')
         return v
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         if len(v.strip()) < 2:
             raise ValueError('Name must be at least 2 characters long')
@@ -37,8 +40,7 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -63,7 +65,8 @@ class RegisterRequest(BaseModel):
     store_id: str
     store_name: str
     
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password(cls, v):
         if len(v) < 6:
             raise ValueError('Password must be at least 6 characters long')
@@ -73,13 +76,15 @@ class RegisterRequest(BaseModel):
             raise ValueError('Password must contain at least one letter')
         return v
     
-    @validator('role')
+    @field_validator('role')
+    @classmethod
     def validate_role(cls, v):
         if v not in ['associate', 'manager']:
             raise ValueError('Role must be either "associate" or "manager"')
         return v
     
-    @validator('name')
+    @field_validator('name')
+    @classmethod
     def validate_name(cls, v):
         if len(v.strip()) < 2:
             raise ValueError('Name must be at least 2 characters long')
@@ -87,13 +92,15 @@ class RegisterRequest(BaseModel):
             raise ValueError('Name must be less than 100 characters')
         return v.strip()
     
-    @validator('store_id')
+    @field_validator('store_id')
+    @classmethod
     def validate_store_id(cls, v):
         if len(v.strip()) < 1:
             raise ValueError('Store ID is required')
         return v.strip()
     
-    @validator('store_name')
+    @field_validator('store_name')
+    @classmethod
     def validate_store_name(cls, v):
         if len(v.strip()) < 2:
             raise ValueError('Store name must be at least 2 characters long')
