@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: shelfmind-api
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: |
+      cd backend &&
+      pip install --upgrade pip &&
+      pip install --only-binary=:all: -r requirements.txt
+    startCommand: cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://your-frontend-domain.onrender.com,http://localhost:5137
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 30
+    autoDeploy: true
+    disk:
+      name: shelfmind-data
+      mountPath: /opt/render/project/data
+      sizeGB: 1
