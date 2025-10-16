@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 from datetime import timedelta
 import uuid
 from typing import Dict, Any
 
-from database import get_db, UserDB
+from database import get_db, UserDocument
 from models.user import (
     RegisterRequest, 
     RegisterResponse, 
@@ -26,7 +25,7 @@ router = APIRouter()
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_data: RegisterRequest,
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Register a new user (store associate or store manager).
@@ -39,9 +38,12 @@ async def register_user(
     - **store_name**: Store display name
     """
     
+    print(f"[DEBUG] Registration attempt for email: {user_data.email}, role: {user_data.role}")
+    
     # Check if user already exists
-    existing_user = get_user_by_email(db, user_data.email)
+    existing_user = await get_user_by_email(user_data.email)
     if existing_user:
+        print(f"[DEBUG] User already exists: {existing_user.get('id', 'unknown')}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
@@ -49,28 +51,30 @@ async def register_user(
     
     # Generate unique user ID
     user_id = f"{user_data.role}-{str(uuid.uuid4())[:8]}"
+    print(f"[DEBUG] Generated user ID: {user_id}")
     
     # Hash password
     hashed_password = get_password_hash(user_data.password)
     
-    # Create user in database
-    db_user = UserDB(
-        id=user_id,
-        email=user_data.email,
-        name=user_data.name,
-        hashed_password=hashed_password,
-        role=user_data.role,
-        store_id=user_data.store_id,
-        store_name=user_data.store_name,
-        is_active=True
-    )
+    # Create user document
+    user_doc = {
+        "id": user_id,
+        "email": user_data.email,
+        "name": user_data.name,
+        "hashed_password": hashed_password,
+        "role": user_data.role,
+        "store_id": user_data.store_id,
+        "store_name": user_data.store_name,
+        "is_active": True
+    }
+    
+    print(f"[DEBUG] Creating user document: {user_doc['id']} - {user_doc['name']} ({user_doc['email']})")
     
     try:
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        created_user = await UserDocument.create_user(user_doc)
+        print(f"[DEBUG] User created successfully: {created_user.get('id', 'unknown')}")
     except Exception as e:
-        db.rollback()
+        print(f"[DEBUG] Failed to create user: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create user account"
@@ -79,21 +83,21 @@ async def register_user(
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": db_user.email, "user_id": db_user.id, "role": db_user.role},
+        data={"sub": created_user["email"], "user_id": created_user["id"], "role": created_user["role"]},
         expires_delta=access_token_expires
     )
     
     # Convert to response model
     user_response = UserResponse(
-        id=db_user.id,
-        email=db_user.email,
-        name=db_user.name,
-        role=db_user.role,
-        store_id=db_user.store_id,
-        store_name=db_user.store_name,
-        is_active=db_user.is_active,
-        created_at=db_user.created_at,
-        updated_at=db_user.updated_at
+        id=created_user["id"],
+        email=created_user["email"],
+        name=created_user["name"],
+        role=created_user["role"],
+        store_id=created_user["store_id"],
+        store_name=created_user["store_name"],
+        is_active=created_user["is_active"],
+        created_at=created_user["created_at"],
+        updated_at=created_user["updated_at"]
     )
     
     return RegisterResponse(
@@ -106,7 +110,7 @@ async def register_user(
 @router.post("/login", response_model=Token)
 async def login_user(
     user_credentials: UserLogin,
-    db: Session = Depends(get_db)
+    db = Depends(get_db)
 ):
     """
     Authenticate user and return access token.
@@ -117,8 +121,7 @@ async def login_user(
     """
     
     # Authenticate user
-    user = authenticate_user(
-        db, 
+    user = await authenticate_user(
         user_credentials.email, 
         user_credentials.password, 
         user_credentials.role
@@ -134,21 +137,21 @@ async def login_user(
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.email, "user_id": user.id, "role": user.role},
+        data={"sub": user["email"], "user_id": user["id"], "role": user["role"]},
         expires_delta=access_token_expires
     )
     
     # Convert to response model
     user_response = UserResponse(
-        id=user.id,
-        email=user.email,
-        name=user.name,
-        role=user.role,
-        store_id=user.store_id,
-        store_name=user.store_name,
-        is_active=user.is_active,
-        created_at=user.created_at,
-        updated_at=user.updated_at
+        id=user["id"],
+        email=user["email"],
+        name=user["name"],
+        role=user["role"],
+        store_id=user["store_id"],
+        store_name=user["store_name"],
+        is_active=user["is_active"],
+        created_at=user["created_at"],
+        updated_at=user["updated_at"]
     )
     
     return Token(
@@ -159,21 +162,21 @@ async def login_user(
 
 @router.get("/validate", response_model=UserResponse)
 async def validate_token(
-    current_user: UserDB = Depends(get_current_active_user)
+    current_user: dict = Depends(get_current_active_user)
 ):
     """
     Validate current access token and return user information.
     """
     return UserResponse(
-        id=current_user.id,
-        email=current_user.email,
-        name=current_user.name,
-        role=current_user.role,
-        store_id=current_user.store_id,
-        store_name=current_user.store_name,
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at
+        id=current_user["id"],
+        email=current_user["email"],
+        name=current_user["name"],
+        role=current_user["role"],
+        store_id=current_user["store_id"],
+        store_name=current_user["store_name"],
+        is_active=current_user["is_active"],
+        created_at=current_user["created_at"],
+        updated_at=current_user["updated_at"]
     )
 
 @router.get("/roles", response_model=Dict[str, Any])

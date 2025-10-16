@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Registration Test</title>
+</head>
+<body>
+    <h1>Frontend Registration Test</h1>
+    <form id="testForm">
+        <div>
+            <label>Email: <input type="email" id="email" value="frontend.test@example.com" required></label>
+        </div>
+        <div>
+            <label>Password: <input type="password" id="password" value="password123" required></label>
+        </div>
+        <div>
+            <label>Name: <input type="text" id="name" value="Frontend Test User" required></label>
+        </div>
+        <div>
+            <label>Role: 
+                <select id="role" required>
+                    <option value="associate">Associate</option>
+                    <option value="manager">Manager</option>
+                </select>
+            </label>
+        </div>
+        <div>
+            <label>Store ID: <input type="text" id="storeId" value="store-frontend" required></label>
+        </div>
+        <div>
+            <label>Store Name: <input type="text" id="storeName" value="Frontend Test Store" required></label>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000/api';
+        
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Testing registration...</p>';
+            
+            const formData = {
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                name: document.getElementById('name').value,
+                role: document.getElementById('role').value,
+                store_id: document.getElementById('storeId').value,
+                store_name: document.getElementById('storeName').value
+            };
+            
+            console.log('[DEBUG] Frontend Test - Form data:', formData);
+            
+            try {
+                console.log('[DEBUG] Frontend Test - Sending request to:', `${API_BASE_URL}/auth/register`);
+                
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+                
+                console.log('[DEBUG] Frontend Test - Response status:', response.status);
+                console.log('[DEBUG] Frontend Test - Response headers:', Object.fromEntries(response.headers.entries()));
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.log('[DEBUG] Frontend Test - Error response:', errorData);
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${JSON.stringify(errorData, null, 2)}</p>`;
+                } else {
+                    const responseData = await response.json();
+                    console.log('[DEBUG] Frontend Test - Success response:', responseData);
+                    resultDiv.innerHTML = `<p style="color: green;">Success! User created: ${responseData.user.id}</p>`;
+                }
+                
+            } catch (error) {
+                console.error('[DEBUG] Frontend Test - Request error:', error);
+                resultDiv.innerHTML = `<p style="color: red;">Network Error: ${error.message}</p>`;
+            }
+        });
+        
+        // Test if we can reach the API at all
+        async function testApiConnection() {
+            try {
+                console.log('[DEBUG] Testing API connection...');
+                const response = await fetch(`${API_BASE_URL.replace('/api', '')}/health`);
+                console.log('[DEBUG] Health check response:', response.status);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('[DEBUG] Health check data:', data);
+                }
+            } catch (error) {
+                console.error('[DEBUG] Health check failed:', error);
+            }
+        }
+        
+        // Run connection test on page load
+        testApiConnection();
+    </script>
+</body>
+</html>

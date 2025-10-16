@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any
 
 # Configuration
-API_BASE_URL = "http://localhost:8002"
+API_BASE_URL = "http://localhost:8000"
 REGISTER_ENDPOINT = f"{API_BASE_URL}/api/auth/register"
 
 # Demo user data

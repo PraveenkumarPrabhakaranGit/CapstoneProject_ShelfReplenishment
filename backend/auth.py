@@ -3,12 +3,11 @@ from typing import Optional
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
 import hashlib
 import os
 from dotenv import load_dotenv
 
-from database import get_db, UserDB
+from database import get_db, UserDocument
 from models.user import TokenData
 
 load_dotenv()
@@ -28,7 +27,19 @@ security = HTTPBearer()
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain password against its hash."""
-    return _hash_password_simple(plain_password) == hashed_password
+    # Check if it's an Argon2 hash (starts with $argon2)
+    if hashed_password.startswith('$argon2'):
+        try:
+            from argon2 import PasswordHasher
+            ph = PasswordHasher()
+            ph.verify(hashed_password, plain_password)
+            return True
+        except Exception as e:
+            print(f"[DEBUG] Argon2 verification failed: {e}")
+            return False
+    else:
+        # Use simple SHA-256 verification for current system
+        return _hash_password_simple(plain_password) == hashed_password
 
 def get_password_hash(password: str) -> str:
     """Hash a password."""
@@ -59,31 +70,63 @@ def verify_token(token: str, credentials_exception):
     except JWTError:
         raise credentials_exception
 
-def get_user_by_email(db: Session, email: str) -> Optional[UserDB]:
+async def get_user_by_email(email: str) -> Optional[dict]:
     """Get user by email from database."""
-    return db.query(UserDB).filter(UserDB.email == email).first()
+    return await UserDocument.get_user_by_email(email)
 
-def get_user_by_id(db: Session, user_id: str) -> Optional[UserDB]:
+async def get_user_by_id(user_id: str) -> Optional[dict]:
     """Get user by ID from database."""
-    return db.query(UserDB).filter(UserDB.id == user_id).first()
+    return await UserDocument.get_user_by_id(user_id)
 
-def authenticate_user(db: Session, email: str, password: str, role: str) -> Optional[UserDB]:
+async def authenticate_user(email: str, password: str, role: str) -> Optional[dict]:
     """Authenticate user with email, password, and role."""
-    user = get_user_by_email(db, email)
+    print(f"[DEBUG] Authentication attempt for email: {email}, role: {role}")
+    
+    user = await get_user_by_email(email)
     if not user:
+        print(f"[DEBUG] No user found with email: {email}")
         return None
-    if not verify_password(password, user.hashed_password):
+    
+    print(f"[DEBUG] Found user: {user.get('id', 'unknown')} - {user.get('name', 'unknown')}")
+    print(f"[DEBUG] User document fields: {list(user.keys())}")
+    # Safely print user content without accessing potentially missing fields
+    safe_user = {k: v for k, v in user.items() if k != '_id'}  # Exclude MongoDB ObjectId for cleaner output
+    print(f"[DEBUG] User document content: {safe_user}")
+    
+    # Check for password field (support both hashed_password and password_hash)
+    password_hash = None
+    if "hashed_password" in user:
+        password_hash = user["hashed_password"]
+        print(f"[DEBUG] Using 'hashed_password' field")
+    elif "password_hash" in user:
+        password_hash = user["password_hash"]
+        print(f"[DEBUG] Using 'password_hash' field (legacy)")
+    else:
+        print(f"[ERROR] User {user.get('email', 'unknown')} is missing password field!")
+        print(f"[ERROR] Available fields: {list(user.keys())}")
+        # Check for alternative password field names
+        password_fields = [k for k in user.keys() if 'password' in k.lower()]
+        if password_fields:
+            print(f"[DEBUG] Found password-related fields: {password_fields}")
         return None
-    if user.role != role:
+    
+    if not verify_password(password, password_hash):
+        print(f"[DEBUG] Password verification failed for user: {user.get('id', 'unknown')}")
         return None
-    if not user.is_active:
+    if user["role"] != role:
+        print(f"[DEBUG] Role mismatch - expected: {role}, actual: {user['role']}")
         return None
+    if not user.get("is_active", True):
+        print(f"[DEBUG] User is inactive: {user.get('id', 'unknown')}")
+        return None
+    
+    print(f"[DEBUG] Authentication successful for user: {user.get('id', 'unknown')}")
     return user
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
-) -> UserDB:
+    db = Depends(get_db)
+) -> dict:
     """Get current authenticated user."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -93,21 +136,21 @@ async def get_current_user(
     
     token = credentials.credentials
     token_data = verify_token(token, credentials_exception)
-    user = get_user_by_id(db, token_data.user_id)
+    user = await get_user_by_id(token_data.user_id)
     if user is None:
         raise credentials_exception
     return user
 
-async def get_current_active_user(current_user: UserDB = Depends(get_current_user)) -> UserDB:
+async def get_current_active_user(current_user: dict = Depends(get_current_user)) -> dict:
     """Get current active user."""
-    if not current_user.is_active:
+    if not current_user.get("is_active", True):
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
 def require_role(required_role: str):
     """Decorator to require specific role."""
-    def role_checker(current_user: UserDB = Depends(get_current_active_user)) -> UserDB:
-        if current_user.role != required_role:
+    async def role_checker(current_user: dict = Depends(get_current_active_user)) -> dict:
+        if current_user["role"] != required_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Access denied. Required role: {required_role}"
@@ -116,10 +159,10 @@ def require_role(required_role: str):
     return role_checker
 
 # Role-specific dependencies
-def get_current_manager(current_user: UserDB = Depends(require_role("manager"))) -> UserDB:
+async def get_current_manager(current_user: dict = Depends(require_role("manager"))) -> dict:
     """Get current manager user."""
     return current_user
 
-def get_current_associate(current_user: UserDB = Depends(require_role("associate"))) -> UserDB:
+async def get_current_associate(current_user: dict = Depends(require_role("associate"))) -> dict:
     """Get current associate user."""
     return current_user

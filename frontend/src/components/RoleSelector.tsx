@@ -77,8 +77,8 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ onRoleSelect }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-white/95 backdrop-blur-sm">
-          <Button className="w-full h-12 text-base font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-200 group-hover:scale-105 flex items-center justify-center shadow-lg rounded-xl">
-            <span className="text-center">Continue as Associate</span>
+          <Button className="w-full h-12 text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-200 group-hover:scale-105 flex items-center justify-center shadow-lg rounded-xl px-4 py-3" style={{ color: 'white' }}>
+            <span className="text-center whitespace-nowrap leading-none text-white" style={{ color: 'white' }}>Continue as Associate</span>
           </Button>
         </CardContent>
       </Card>
@@ -157,8 +157,8 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ onRoleSelect }) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="bg-white/95 backdrop-blur-sm">
-          <Button className="w-full h-12 text-base font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white transition-all duration-200 group-hover:scale-105 flex items-center justify-center shadow-lg rounded-xl">
-            <span className="text-center">Continue as Manager</span>
+          <Button className="w-full h-12 text-sm font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white transition-all duration-200 group-hover:scale-105 flex items-center justify-center shadow-lg rounded-xl px-4 py-3" style={{ color: 'white' }}>
+            <span className="text-center whitespace-nowrap leading-none text-white" style={{ color: 'white' }}>Continue as Manager</span>
           </Button>
         </CardContent>
       </Card>

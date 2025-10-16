@@ -5,44 +5,71 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 222.2 84% 4.9%;
+    /* Base Colors - Light, professional background */
+    --background: 248 250 252; /* slate-50 equivalent */
+    --foreground: 15 23 42; /* slate-800 equivalent */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card Colors - Clean white cards with subtle shadows */
+    --card: 255 255 255; /* white */
+    --card-foreground: 15 23 42; /* slate-800 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Popover Colors */
+    --popover: 255 255 255; /* white */
+    --popover-foreground: 15 23 42; /* slate-800 */
 
-    --primary: 214 100% 50%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary Brand Colors - Professional blue theme */
+    --primary: 37 99 235; /* blue-600 - main brand color */
+    --primary-foreground: 248 250 252; /* slate-50 */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary Colors - Subtle grays for secondary elements */
+    --secondary: 241 245 249; /* slate-100 */
+    --secondary-foreground: 51 65 85; /* slate-700 */
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted Colors - For less prominent text and backgrounds */
+    --muted: 248 250 252; /* slate-50 */
+    --muted-foreground: 100 116 139; /* slate-500 */
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent Colors - For highlights and interactive elements */
+    --accent: 239 246 255; /* blue-50 */
+    --accent-foreground: 29 78 216; /* blue-700 */
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive Colors - For errors and critical actions */
+    --destructive: 239 68 68; /* red-500 */
+    --destructive-foreground: 248 250 252; /* slate-50 */
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 214 100% 50%;
+    /* Border and Input Colors - Subtle, professional borders */
+    --border: 226 232 240; /* slate-200 */
+    --input: 226 232 240; /* slate-200 */
+    --ring: 37 99 235; /* blue-600 - focus rings */
 
-    --radius: 0.375rem;
+    /* Border Radius - Consistent rounded corners */
+    --radius: 0.5rem; /* 8px - slightly more rounded for modern look */
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 214 100% 50%;
+    /* Sidebar Colors */
+    --sidebar-background: 248 250 252; /* slate-50 */
+    --sidebar-foreground: 51 65 85; /* slate-700 */
+    --sidebar-primary: 15 23 42; /* slate-800 */
+    --sidebar-primary-foreground: 248 250 252; /* slate-50 */
+    --sidebar-accent: 241 245 249; /* slate-100 */
+    --sidebar-accent-foreground: 15 23 42; /* slate-800 */
+    --sidebar-border: 226 232 240; /* slate-200 */
+    --sidebar-ring: 37 99 235; /* blue-600 */
+
+    /* ShelfMind Brand Variables */
+    --brand-primary: 37 99 235; /* blue-600 */
+    --brand-primary-light: 147 197 253; /* blue-300 */
+    --brand-primary-dark: 29 78 216; /* blue-700 */
+    
+    /* Status Color Variables */
+    --status-healthy: 34 197 94; /* green-500 */
+    --status-warning: 245 158 11; /* amber-500 */
+    --status-critical: 239 68 68; /* red-500 */
+    --status-info: 59 130 246; /* blue-500 */
+    
+    /* Priority Color Variables */
+    --priority-low: 100 116 139; /* slate-500 */
+    --priority-medium: 245 158 11; /* amber-500 */
+    --priority-high: 239 68 68; /* red-500 */
   }
 
   .dark {
@@ -96,48 +123,166 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Professional retail app styling */
+  /* ShelfMind Professional Retail App Styling */
   .retail-bg {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    min-height: 100vh;
   }
 
   .retail-card {
-    @apply bg-white border border-gray-200 shadow-sm;
+    @apply bg-white border border-slate-200 shadow-sm rounded-lg;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .retail-card:hover {
+    @apply shadow-md border-slate-300;
   }
 
   .retail-header {
-    @apply bg-white border-b border-gray-200;
+    @apply bg-white border-b border-slate-200 shadow-sm;
+    backdrop-filter: blur(8px);
   }
 
-  /* Typography improvements for retail apps */
+  /* Enhanced Typography for Professional Look */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     letter-spacing: -0.025em;
+    color: hsl(var(--foreground));
   }
 
-  /* Professional button styling */
+  h1 { @apply text-3xl lg:text-4xl; }
+  h2 { @apply text-2xl lg:text-3xl; }
+  h3 { @apply text-xl lg:text-2xl; }
+  h4 { @apply text-lg lg:text-xl; }
+
+  /* Professional Button Styling */
   .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium;
+    @apply bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-2;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    transform: translateY(-1px);
   }
 
   .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium;
+    @apply bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold rounded-lg px-4 py-2;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
 
-  /* Status indicators common in retail apps */
+  .btn-secondary:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Enhanced Status Indicators for Retail Operations */
   .status-healthy {
-    @apply bg-green-50 text-green-700 border-green-200;
+    @apply bg-green-50 text-green-700 border-green-200 rounded-lg px-3 py-1;
+    font-weight: 600;
   }
 
   .status-warning {
-    @apply bg-yellow-50 text-yellow-700 border-yellow-200;
+    @apply bg-amber-50 text-amber-700 border-amber-200 rounded-lg px-3 py-1;
+    font-weight: 600;
   }
 
   .status-critical {
-    @apply bg-red-50 text-red-700 border-red-200;
+    @apply bg-red-50 text-red-700 border-red-200 rounded-lg px-3 py-1;
+    font-weight: 600;
   }
 
   .status-info {
-    @apply bg-blue-50 text-blue-700 border-blue-200;
+    @apply bg-blue-50 text-blue-700 border-blue-200 rounded-lg px-3 py-1;
+    font-weight: 600;
   }
+
+  /* Priority Indicators for Task Management */
+  .priority-low {
+    @apply bg-slate-50 text-slate-700 border-slate-200 rounded-lg px-3 py-1;
+    font-weight: 600;
+  }
+
+  .priority-medium {
+    @apply bg-amber-50 text-amber-700 border-amber-200 rounded-lg px-3 py-1;
+    font-weight: 600;
+  }
+
+  .priority-high {
+    @apply bg-red-50 text-red-700 border-red-200 rounded-lg px-3 py-1;
+    font-weight: 600;
+  }
+
+  /* Brand Gradient Utilities */
+  .brand-gradient {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+  }
+
+  .brand-gradient-subtle {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);
+  }
+
+  /* Card Variants for Different Content Types */
+  .card-elevated {
+    @apply bg-white border border-slate-200 rounded-xl shadow-lg;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .card-elevated:hover {
+    @apply shadow-xl border-slate-300;
+    transform: translateY(-2px);
+  }
+
+  .card-interactive {
+    @apply bg-white border-2 border-slate-200 rounded-xl shadow-md cursor-pointer;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .card-interactive:hover {
+    @apply border-brand-300 shadow-lg;
+    transform: translateY(-1px);
+  }
+
+  /* Focus States for Accessibility */
+  .focus-brand {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2;
+  }
+
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive Text Utilities */
+  .text-responsive-sm { @apply text-sm md:text-base; }
+  .text-responsive-base { @apply text-base md:text-lg; }
+  .text-responsive-lg { @apply text-lg md:text-xl; }
+  .text-responsive-xl { @apply text-xl md:text-2xl; }
+
+  /* Professional Spacing Utilities */
+  .section-padding { @apply px-4 py-6 md:px-6 md:py-8 lg:px-8 lg:py-10; }
+  .card-padding { @apply p-4 md:p-6; }
+  .content-max-width { @apply max-w-7xl mx-auto; }
 }

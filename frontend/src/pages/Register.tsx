@@ -115,7 +115,12 @@ const Register = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('[DEBUG] Register.tsx - Form submission started');
+    console.log('[DEBUG] Register.tsx - Selected role:', selectedRole);
+    console.log('[DEBUG] Register.tsx - Form data:', formData);
+    
     if (!validateForm() || !selectedRole) {
+      console.log('[DEBUG] Register.tsx - Validation failed or no role selected');
       return;
     }
 
@@ -131,6 +136,7 @@ const Register = () => {
         store_name: formData.storeName
       };
 
+      console.log('[DEBUG] Register.tsx - Prepared registration data:', registerData);
       const response = await registerUser(registerData);
       
       // Store authentication data

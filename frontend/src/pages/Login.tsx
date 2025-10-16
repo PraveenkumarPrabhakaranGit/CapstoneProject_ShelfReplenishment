@@ -9,7 +9,7 @@ import ShelfMindLogo from '@/components/ShelfMindLogo';
 import RoleSelector from '@/components/RoleSelector';
 import { showSuccess, showError } from '@/utils/toast';
 import { useNavigate } from 'react-router-dom';
-import { User } from '@/types';
+import { loginUser, LoginRequest } from '@/utils/api';
 
 const Login = () => {
   const [step, setStep] = useState<'role' | 'credentials'>('role');
@@ -18,6 +18,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
   const handleRoleSelect = (role: 'associate' | 'manager') => {
@@ -26,11 +27,11 @@ const Login = () => {
     
     // Pre-fill demo credentials based on role
     if (role === 'associate') {
-      setEmail('alex@shelfmind.com');
-      setPassword('associate123');
+      setEmail('associate@demo.com');
+      setPassword('demo123');
     } else {
-      setEmail('maria@shelfmind.com');
-      setPassword('manager123');
+      setEmail('manager@demo.com');
+      setPassword('demo456');
     }
   };
 
@@ -44,30 +45,46 @@ const Login = () => {
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      const user: User = {
-        id: selectedRole === 'associate' ? 'alex-001' : 'maria-001',
+    try {
+      const loginData: LoginRequest = {
         email,
-        name: selectedRole === 'associate' ? 'Alex Rodriguez' : 'Maria Chen',
-        role: selectedRole,
-        storeId: 'store-001',
-        storeName: 'Metro Fresh Market'
+        password,
+        role: selectedRole
       };
+
+      const response = await loginUser(loginData);
       
+      // Store authentication data
       localStorage.setItem('shelfmind_auth', 'true');
-      localStorage.setItem('shelfmind_user', JSON.stringify(user));
+      localStorage.setItem('shelfmind_user', JSON.stringify({
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.name,
+        role: response.user.role,
+        storeId: response.user.store_id,
+        storeName: response.user.store_name
+      }));
+      localStorage.setItem('shelfmind_token', response.access_token);
       
-      showSuccess(`Welcome ${user.name}!`);
+      // Set logged in state to show store info briefly
+      setIsLoggedIn(true);
+      
+      showSuccess(`Welcome ${response.user.name}!`);
+      
+      // Navigate based on role after a brief delay to show store info
+      setTimeout(() => {
+        if (selectedRole === 'associate') {
+          navigate('/associate');
+        } else {
+          navigate('/manager');
+        }
+      }, 1500);
+    } catch (error) {
+      console.error('Login error:', error);
+      showError(error instanceof Error ? error.message : 'Login failed. Please try again.');
+    } finally {
       setIsLoading(false);
-      
-      // Navigate based on role
-      if (selectedRole === 'associate') {
-        navigate('/associate');
-      } else {
-        navigate('/manager');
-      }
-    }, 1500);
+    }
   };
 
   const handleBack = () => {
@@ -238,19 +255,21 @@ const Login = () => {
             </Card>
           )}
 
-          {/* Store Info Footer */}
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center space-x-4 text-white/80 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span>Metro Fresh Market</span>
+          {/* Store Info Footer - Only show after successful login */}
+          {isLoggedIn && (
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center space-x-4 text-white/80 text-sm">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span>Metro Fresh Market</span>
+                </div>
+                <div className="w-1 h-4 bg-white/30"></div>
+                <span>Store #001</span>
+                <div className="w-1 h-4 bg-white/30"></div>
+                <span>Downtown Location</span>
               </div>
-              <div className="w-1 h-4 bg-white/30"></div>
-              <span>Store #001</span>
-              <div className="w-1 h-4 bg-white/30"></div>
-              <span>Downtown Location</span>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

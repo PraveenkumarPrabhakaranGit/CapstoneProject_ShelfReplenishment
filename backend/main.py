@@ -3,25 +3,40 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 
 # Load environment variables
 load_dotenv()
 
+# Import database functions
+from database import connect_to_mongo, close_mongo_connection
+
 # Import routers
 from routers.auth import router as auth_router
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await connect_to_mongo()
+    yield
+    # Shutdown
+    await close_mongo_connection()
 
 app = FastAPI(
     title="ShelfMind API",
     description="AI-Powered Shelf Monitoring Backend API",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # CORS middleware
+cors_origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:5137").split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:5137").split(","),
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -35,6 +50,7 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "message": "API is operational"}
+
 
 if __name__ == "__main__":
     import uvicorn

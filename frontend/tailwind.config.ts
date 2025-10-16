@@ -78,6 +78,77 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // ShelfMind Brand Colors
+        brand: {
+          50: "#eff6ff",
+          100: "#dbeafe",
+          200: "#bfdbfe",
+          300: "#93c5fd",
+          400: "#60a5fa",
+          500: "#3b82f6", // Primary brand blue
+          600: "#2563eb", // Main action blue
+          700: "#1d4ed8",
+          800: "#1e40af",
+          900: "#1e3a8a",
+          950: "#172554",
+        },
+        // Status Colors for Retail Operations
+        status: {
+          healthy: {
+            50: "#f0fdf4",
+            100: "#dcfce7",
+            500: "#22c55e",
+            600: "#16a34a",
+            700: "#15803d",
+          },
+          warning: {
+            50: "#fffbeb",
+            100: "#fef3c7",
+            500: "#f59e0b",
+            600: "#d97706",
+            700: "#b45309",
+          },
+          critical: {
+            50: "#fef2f2",
+            100: "#fee2e2",
+            500: "#ef4444",
+            600: "#dc2626",
+            700: "#b91c1c",
+          },
+          info: {
+            50: "#eff6ff",
+            100: "#dbeafe",
+            500: "#3b82f6",
+            600: "#2563eb",
+            700: "#1d4ed8",
+          },
+        },
+        // Priority Colors for Task Management
+        priority: {
+          low: {
+            50: "#f8fafc",
+            100: "#f1f5f9",
+            500: "#64748b",
+            600: "#475569",
+            700: "#334155",
+          },
+          medium: {
+            50: "#fffbeb",
+            100: "#fef3c7",
+            500: "#f59e0b",
+            600: "#d97706",
+            700: "#b45309",
+          },
+          high: {
+            50: "#fef2f2",
+            100: "#fee2e2",
+            500: "#ef4444",
+            600: "#dc2626",
+            700: "#b91c1c",
+          },
+        },
+        // Footer specific color
+        'footer-background': '#0F1A3E',
       },
       borderRadius: {
         lg: "var(--radius)",
