@@ -29,15 +29,20 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - More permissive configuration for deployment
 cors_origins = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:5137").split(",")]
+
+# Add wildcard for development if not in production
+if os.getenv("ENVIRONMENT") != "production":
+    cors_origins.append("*")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=cors_origins if os.getenv("ENVIRONMENT") == "production" else ["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 # Include routers

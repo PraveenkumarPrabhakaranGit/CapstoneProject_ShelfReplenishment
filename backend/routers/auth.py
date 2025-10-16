@@ -22,6 +22,23 @@ from auth import (
 
 router = APIRouter()
 
+# Add explicit OPTIONS handlers for CORS preflight
+@router.options("/register")
+async def options_register():
+    return {"message": "OK"}
+
+@router.options("/login")
+async def options_login():
+    return {"message": "OK"}
+
+@router.options("/validate")
+async def options_validate():
+    return {"message": "OK"}
+
+@router.options("/roles")
+async def options_roles():
+    return {"message": "OK"}
+
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(
     user_data: RegisterRequest,
